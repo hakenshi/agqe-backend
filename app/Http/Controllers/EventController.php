@@ -2,41 +2,29 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreEventRequest;
+use App\Http\Requests\UpdateEventRequest;
+use App\Http\Resources\EventResource;
 use App\Models\Event;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class EventController extends Controller
 {
     public function index()
     {
-        return response()->json(Event::all());
+        return EventResource::collection(Event::all());
     }
 
-    public function store(Request $request)
+    public function store(StoreEventRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'cover_image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-            'event_type' => 'required|in:gallery,event,event_gallery',
-            'date' => 'required|date',
-            'starting_time' => 'required|date_format:H:i',
-            'ending_time' => 'required|date_format:H:i',
-            'location' => 'required|string|max:255',
-            'markdown' => 'nullable|string',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
         $coverImagePath = $request->file('cover_image')->store('events', 'public');
 
         $event = Event::create([
             'name' => $request->name,
             'cover_image' => $coverImagePath,
             'event_type' => $request->event_type,
+            'slug' => Str::slug($request->name),
             'date' => $request->date,
             'starting_time' => $request->starting_time,
             'ending_time' => $request->ending_time,
@@ -44,36 +32,27 @@ class EventController extends Controller
             'markdown' => $request->markdown,
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Evento criado com sucesso',
-            'event' => $event,
-        ], 201);
+        return new EventResource($event);
     }
 
     public function show(Event $event)
     {
-        return response()->json($event);
+        return new EventResource($event);
     }
 
-    public function update(Request $request, Event $event)
+    public function showBySlug($slug)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'sometimes|string|max:255',
-            'cover_image' => 'sometimes|image|mimes:jpeg,png,jpg|max:2048',
-            'event_type' => 'sometimes|in:gallery,event,event_gallery',
-            'date' => 'sometimes|date',
-            'starting_time' => 'sometimes|date_format:H:i',
-            'ending_time' => 'sometimes|date_format:H:i',
-            'location' => 'sometimes|string|max:255',
-            'markdown' => 'nullable|string',
-        ]);
+        $event = Event::where('slug', $slug)->firstOrFail();
+        return new EventResource($event);
+    }
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
+    public function update(UpdateEventRequest $request, Event $event)
+    {
         $data = $request->only(['name', 'event_type', 'date', 'starting_time', 'ending_time', 'location', 'markdown']);
+        
+        if ($request->filled('name')) {
+            $data['slug'] = Str::slug($request->name);
+        }
 
         if ($request->hasFile('cover_image')) {
             if ($event->cover_image) {
@@ -84,11 +63,7 @@ class EventController extends Controller
 
         $event->update($data);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Evento atualizado com sucesso',
-            'event' => $event,
-        ]);
+        return new EventResource($event);
     }
 
     public function destroy(Event $event)
@@ -99,9 +74,6 @@ class EventController extends Controller
 
         $event->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Evento excluído com sucesso',
-        ]);
+        return new EventResource($event);
     }
 }

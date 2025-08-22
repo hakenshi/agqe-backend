@@ -2,37 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreProjectRequest;
+use App\Http\Requests\UpdateProjectRequest;
+use App\Http\Resources\ProjectResource;
 use App\Models\Project;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class ProjectController extends Controller
 {
     public function index()
     {
-        return response()->json(Project::all());
+        return ProjectResource::collection(Project::all());
     }
 
-    public function store(Request $request)
+    public function store(StoreProjectRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'cover_image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-            'project_type' => 'required|in:social,educational,environmental,cultural,health',
-            'status' => 'required|in:planning,active,completed,archived',
-            'responsibles' => 'nullable|string',
-            'location' => 'nullable|string|max:255',
-            'date' => 'nullable|date',
-            'starting_time' => 'nullable|date_format:H:i',
-            'ending_time' => 'nullable|date_format:H:i',
-            'markdown' => 'nullable|string',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
         $coverImagePath = $request->file('cover_image')->store('projects', 'public');
 
         $project = Project::create([
@@ -40,6 +25,7 @@ class ProjectController extends Controller
             'cover_image' => $coverImagePath,
             'project_type' => $request->project_type,
             'status' => $request->status,
+            'slug' => Str::slug($request->name),
             'responsibles' => $request->responsibles,
             'location' => $request->location,
             'date' => $request->date,
@@ -48,38 +34,21 @@ class ProjectController extends Controller
             'markdown' => $request->markdown,
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Projeto criado com sucesso',
-            'project' => $project,
-        ], 201);
+        return new ProjectResource($project);
     }
 
     public function show(Project $project)
     {
-        return response()->json($project);
+        return new ProjectResource($project);
     }
 
-    public function update(Request $request, Project $project)
+    public function update(UpdateProjectRequest $request, Project $project)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'sometimes|string|max:255',
-            'cover_image' => 'sometimes|image|mimes:jpeg,png,jpg|max:2048',
-            'project_type' => 'sometimes|in:social,educational,environmental,cultural,health',
-            'status' => 'sometimes|in:planning,active,completed,archived',
-            'responsibles' => 'nullable|string',
-            'location' => 'nullable|string|max:255',
-            'date' => 'nullable|date',
-            'starting_time' => 'nullable|date_format:H:i',
-            'ending_time' => 'nullable|date_format:H:i',
-            'markdown' => 'nullable|string',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
         $data = $request->only(['name', 'project_type', 'status', 'responsibles', 'location', 'date', 'starting_time', 'ending_time', 'markdown']);
+        
+        if ($request->filled('name')) {
+            $data['slug'] = Str::slug($request->name);
+        }
 
         if ($request->hasFile('cover_image')) {
             if ($project->cover_image) {
@@ -90,11 +59,7 @@ class ProjectController extends Controller
 
         $project->update($data);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Projeto atualizado com sucesso',
-            'project' => $project,
-        ]);
+        return new ProjectResource($project);
     }
 
     public function destroy(Project $project)
@@ -105,9 +70,6 @@ class ProjectController extends Controller
 
         $project->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Projeto excluído com sucesso',
-        ]);
+        return new ProjectResource($project);
     }
 }

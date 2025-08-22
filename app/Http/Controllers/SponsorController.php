@@ -2,30 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreSponsorRequest;
+use App\Http\Requests\UpdateSponsorRequest;
+use App\Http\Resources\SponsorResource;
 use App\Models\Sponsor;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
 
 class SponsorController extends Controller
 {
     public function index()
     {
-        return response()->json(Sponsor::orderBy('name')->get());
+        return SponsorResource::collection(Sponsor::orderBy('name')->get());
     }
 
-    public function store(Request $request)
+    public function store(StoreSponsorRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'logo' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-            'website' => 'required|url|max:255',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
         $logoPath = $request->file('logo')->store('sponsors', 'public');
 
         $sponsor = Sponsor::create([
@@ -35,30 +26,16 @@ class SponsorController extends Controller
             'sponsoring_since' => now(),
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Apoiador criado com sucesso',
-            'sponsor' => $sponsor,
-        ], 201);
+        return new SponsorResource($sponsor);
     }
 
     public function show(Sponsor $sponsor)
     {
-        return response()->json($sponsor);
+        return new SponsorResource($sponsor);
     }
 
-    public function update(Request $request, Sponsor $sponsor)
+    public function update(UpdateSponsorRequest $request, Sponsor $sponsor)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'sometimes|string|max:255',
-            'logo' => 'sometimes|image|mimes:jpeg,png,jpg|max:2048',
-            'website' => 'sometimes|url|max:255',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
         $data = $request->only(['name', 'website']);
 
         if ($request->hasFile('logo')) {
@@ -70,11 +47,7 @@ class SponsorController extends Controller
 
         $sponsor->update($data);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Apoiador atualizado com sucesso',
-            'sponsor' => $sponsor,
-        ]);
+        return new SponsorResource($sponsor);
     }
 
     public function destroy(Sponsor $sponsor)
@@ -85,9 +58,6 @@ class SponsorController extends Controller
 
         $sponsor->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Apoiador excluído com sucesso',
-        ]);
+        return new SponsorResource($sponsor);
     }
 }

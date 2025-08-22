@@ -2,25 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\LoginRequest;
+use App\Http\Resources\UserResource;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'cpf' => 'required|string',
-            'password' => 'required|string',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()], 400);
-        }
-
         $user = User::where('cpf', $request->cpf)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
@@ -30,14 +21,16 @@ class AuthController extends Controller
         $token = JWTAuth::fromUser($user);
 
         return response()->json([
-            'token' => $token,
-            'user' => $user,
+            'access_token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => config('jwt.ttl') * 60,
+            'user' => new UserResource($user),
         ]);
     }
 
     public function me()
     {
-        return response()->json(auth()->user());
+        return new UserResource(auth()->user());
     }
 
     public function logout()
