@@ -6,7 +6,6 @@ use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
 use App\Http\Resources\ProjectResource;
 use App\Models\Project;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ProjectController extends Controller
@@ -18,11 +17,9 @@ class ProjectController extends Controller
 
     public function store(StoreProjectRequest $request)
     {
-        $coverImagePath = $request->file('cover_image')->store('projects', 'public');
-
         $project = Project::create([
             'name' => $request->name,
-            'cover_image' => $coverImagePath,
+            'cover_image' => $request->cover_image,
             'project_type' => $request->project_type,
             'status' => $request->status,
             'slug' => Str::slug($request->name),
@@ -50,11 +47,8 @@ class ProjectController extends Controller
             $data['slug'] = Str::slug($request->name);
         }
 
-        if ($request->hasFile('cover_image')) {
-            if ($project->cover_image) {
-                Storage::disk('public')->delete($project->cover_image);
-            }
-            $data['cover_image'] = $request->file('cover_image')->store('projects', 'public');
+        if ($request->filled('cover_image')) {
+            $data['cover_image'] = $request->cover_image;
         }
 
         $project->update($data);
@@ -64,9 +58,7 @@ class ProjectController extends Controller
 
     public function destroy(Project $project)
     {
-        if ($project->cover_image) {
-            Storage::disk('public')->delete($project->cover_image);
-        }
+        // Image deletion handled by frontend/Cloudflare R2
 
         $project->delete();
 

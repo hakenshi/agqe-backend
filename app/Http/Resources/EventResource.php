@@ -12,7 +12,7 @@ class EventResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'coverImage' => asset('storage/' . $this->cover_image),
+            'coverImage' => $this->cover_image,
             'eventType' => $this->event_type,
             'slug' => $this->slug,
             'markdown' => $this->markdown,

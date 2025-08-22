@@ -14,7 +14,7 @@ class UserResource extends JsonResource
             'cpf' => $this->cpf,
             'firstName' => $this->first_name,
             'secondName' => $this->second_name,
-            'photo' => $this->photo ? asset('storage/' . $this->photo) : null,
+            'photo' => $this->photo,
             'occupation' => $this->occupation,
             'color' => $this->color,
             'birthDate' => $this->birth_date,

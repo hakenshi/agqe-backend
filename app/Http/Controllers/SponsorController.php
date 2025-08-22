@@ -6,7 +6,6 @@ use App\Http\Requests\StoreSponsorRequest;
 use App\Http\Requests\UpdateSponsorRequest;
 use App\Http\Resources\SponsorResource;
 use App\Models\Sponsor;
-use Illuminate\Support\Facades\Storage;
 
 class SponsorController extends Controller
 {
@@ -17,11 +16,9 @@ class SponsorController extends Controller
 
     public function store(StoreSponsorRequest $request)
     {
-        $logoPath = $request->file('logo')->store('sponsors', 'public');
-
         $sponsor = Sponsor::create([
             'name' => $request->name,
-            'logo' => $logoPath,
+            'logo' => $request->logo,
             'website' => $request->website,
             'sponsoring_since' => now(),
         ]);
@@ -38,11 +35,8 @@ class SponsorController extends Controller
     {
         $data = $request->only(['name', 'website']);
 
-        if ($request->hasFile('logo')) {
-            if ($sponsor->logo) {
-                Storage::disk('public')->delete($sponsor->logo);
-            }
-            $data['logo'] = $request->file('logo')->store('sponsors', 'public');
+        if ($request->filled('logo')) {
+            $data['logo'] = $request->logo;
         }
 
         $sponsor->update($data);
@@ -52,9 +46,7 @@ class SponsorController extends Controller
 
     public function destroy(Sponsor $sponsor)
     {
-        if ($sponsor->logo) {
-            Storage::disk('public')->delete($sponsor->logo);
-        }
+        // Logo deletion handled by frontend/Cloudflare R2
 
         $sponsor->delete();
 

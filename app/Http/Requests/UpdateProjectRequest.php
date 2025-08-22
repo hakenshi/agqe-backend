@@ -15,7 +15,7 @@ class UpdateProjectRequest extends FormRequest
     {
         return [
             'name' => 'sometimes|string|max:255',
-            'cover_image' => 'sometimes|image|mimes:jpeg,png,jpg|max:2048',
+            'cover_image' => 'sometimes|string|url',
             'project_type' => 'sometimes|in:social,educational,environmental,cultural,health',
             'status' => 'sometimes|in:planning,active,completed,archived',
             'responsibles' => 'nullable|string',

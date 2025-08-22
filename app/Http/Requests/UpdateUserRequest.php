@@ -17,7 +17,7 @@ class UpdateUserRequest extends FormRequest
             'cpf' => 'sometimes|string|size:14|unique:users,cpf,' . $this->user->id,
             'first_name' => 'sometimes|string|max:255',
             'second_name' => 'sometimes|string|max:255',
-            'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'photo' => 'nullable|string|url',
             'occupation' => 'sometimes|string|max:255',
             'password' => 'sometimes|string|min:6',
             'birth_date' => 'sometimes|date',

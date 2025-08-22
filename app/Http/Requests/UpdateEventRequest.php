@@ -15,7 +15,7 @@ class UpdateEventRequest extends FormRequest
     {
         return [
             'name' => 'sometimes|string|max:255',
-            'cover_image' => 'sometimes|image|mimes:jpeg,png,jpg|max:2048',
+            'cover_image' => 'sometimes|string|url',
             'event_type' => 'sometimes|in:gallery,event,event_gallery',
             'date' => 'sometimes|date',
             'starting_time' => 'sometimes|date_format:H:i',

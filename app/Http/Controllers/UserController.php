@@ -7,7 +7,6 @@ use App\Http\Requests\UpdateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
@@ -18,12 +17,8 @@ class UserController extends Controller
 
     public function store(StoreUserRequest $request)
     {
-
+        $data = $request->validated();
         $data['password'] = Hash::make($request->password);
-
-        if ($request->hasFile('photo')) {
-            $data['photo'] = $request->file('photo')->store('users', 'public');
-        }
 
         $user = User::create($data);
 
@@ -43,11 +38,8 @@ class UserController extends Controller
             $data['password'] = Hash::make($request->password);
         }
 
-        if ($request->hasFile('photo')) {
-            if ($user->photo) {
-                Storage::disk('public')->delete($user->photo);
-            }
-            $data['photo'] = $request->file('photo')->store('users', 'public');
+        if ($request->filled('photo')) {
+            $data['photo'] = $request->photo;
         }
 
         $user->update($data);
@@ -57,9 +49,7 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
-        if ($user->photo) {
-            Storage::disk('public')->delete($user->photo);
-        }
+        // Photo deletion handled by frontend/Cloudflare R2
 
         $user->delete();
 

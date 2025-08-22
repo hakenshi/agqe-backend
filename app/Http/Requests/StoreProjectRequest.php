@@ -15,7 +15,7 @@ class StoreProjectRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'cover_image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'cover_image' => 'required|string|url',
             'project_type' => 'required|in:social,educational,environmental,cultural,health',
             'status' => 'required|in:planning,active,completed,archived',
             'responsibles' => 'nullable|string',

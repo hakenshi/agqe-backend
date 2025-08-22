@@ -15,7 +15,7 @@ class StoreEventRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'cover_image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'cover_image' => 'required|string|url',
             'event_type' => 'required|in:gallery,event,event_gallery',
             'date' => 'required|date',
             'starting_time' => 'required|date_format:H:i',

@@ -15,7 +15,7 @@ class UpdateSponsorRequest extends FormRequest
     {
         return [
             'name' => 'sometimes|string|max:255',
-            'logo' => 'sometimes|image|mimes:jpeg,png,jpg|max:2048',
+            'logo' => 'sometimes|string|url',
             'website' => 'sometimes|url|max:255',
         ];
     }

@@ -12,7 +12,7 @@ class SponsorResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'logo' => asset('storage/' . $this->logo),
+            'logo' => $this->logo,
             'website' => $this->website,
             'sponsoringSince' => $this->sponsoring_since,
             'createdAt' => $this->created_at,

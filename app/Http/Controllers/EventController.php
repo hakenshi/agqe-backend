@@ -6,7 +6,6 @@ use App\Http\Requests\StoreEventRequest;
 use App\Http\Requests\UpdateEventRequest;
 use App\Http\Resources\EventResource;
 use App\Models\Event;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class EventController extends Controller
@@ -18,11 +17,9 @@ class EventController extends Controller
 
     public function store(StoreEventRequest $request)
     {
-        $coverImagePath = $request->file('cover_image')->store('events', 'public');
-
         $event = Event::create([
             'name' => $request->name,
-            'cover_image' => $coverImagePath,
+            'cover_image' => $request->cover_image,
             'event_type' => $request->event_type,
             'slug' => Str::slug($request->name),
             'date' => $request->date,
@@ -54,11 +51,8 @@ class EventController extends Controller
             $data['slug'] = Str::slug($request->name);
         }
 
-        if ($request->hasFile('cover_image')) {
-            if ($event->cover_image) {
-                Storage::disk('public')->delete($event->cover_image);
-            }
-            $data['cover_image'] = $request->file('cover_image')->store('events', 'public');
+        if ($request->filled('cover_image')) {
+            $data['cover_image'] = $request->cover_image;
         }
 
         $event->update($data);
@@ -68,9 +62,7 @@ class EventController extends Controller
 
     public function destroy(Event $event)
     {
-        if ($event->cover_image) {
-            Storage::disk('public')->delete($event->cover_image);
-        }
+        // Image deletion handled by frontend/Cloudflare R2
 
         $event->delete();
 

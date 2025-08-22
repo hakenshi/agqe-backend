@@ -17,7 +17,7 @@ class StoreUserRequest extends FormRequest
             'cpf' => 'required|string|size:14|unique:users',
             'first_name' => 'required|string|max:255',
             'second_name' => 'required|string|max:255',
-            'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'photo' => 'nullable|string|url',
             'occupation' => 'required|string|max:255',
             'password' => 'required|string|min:6',
             'birth_date' => 'required|date',

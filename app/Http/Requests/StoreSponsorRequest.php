@@ -15,7 +15,7 @@ class StoreSponsorRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'logo' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'logo' => 'required|string|url',
             'website' => 'required|url|max:255',
         ];
     }

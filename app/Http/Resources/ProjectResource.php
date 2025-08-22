@@ -12,7 +12,7 @@ class ProjectResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'coverImage' => asset('storage/' . $this->cover_image),
+            'coverImage' => $this->cover_image,
             'responsibles' => $this->responsibles,
             'projectType' => $this->project_type,
             'slug' => $this->slug,
