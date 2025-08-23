@@ -18,7 +18,7 @@ Route::get('/events/slug/{slug}', [EventController::class, 'showBySlug']);
 Route::get('/sponsors', [SponsorController::class, 'index']);
 Route::get('/users', [UserController::class, 'index']);
 Route::get("/projects", [ProjectController::class, 'index']);
-Route::get("/projects/{project}", [ProjectController::class, 'show']);
+Route::get("/projects/{slug}", [ProjectController::class, 'show']);
 Route::middleware('auth:api')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
