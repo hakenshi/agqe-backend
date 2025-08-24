@@ -43,18 +43,19 @@ class ProjectController extends Controller
 
     public function update(UpdateProjectRequest $request, Project $project)
     {
-        $data = $request->only(['name', 'project_type', 'status', 'responsibles', 'location', 'date', 'starting_time', 'ending_time', 'markdown']);
+        $data = $request->validated();
         
+    
         if ($request->filled('name')) {
             $data['slug'] = Str::slug($request->name);
         }
 
         if ($request->filled('cover_image')) {
-            $data['cover_image'] = $request->cover_image;
+            $data['coverImage'] = $request->coverImage;
         }
 
         $project->update($data);
-
+        
         return new ProjectResource($project);
     }
 

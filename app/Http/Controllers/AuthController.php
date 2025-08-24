@@ -12,14 +12,19 @@ class AuthController extends Controller
 {
     public function login(LoginRequest $request)
     {
-        $user = User::where('cpf', $request->cpf)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
+        $data = $request->validated();
+
+        
+        $user = User::where('cpf', $data['cpf'])->first();
+        
+        
+        if (!$user || !Hash::check($data['password'], $user->password)) {
             return response()->json(['error' => 'Credenciais inválidas'], 401);
         }
-
+        
         $token = JWTAuth::fromUser($user);
-
+        
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
