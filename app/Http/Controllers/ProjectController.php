@@ -17,25 +17,17 @@ class ProjectController extends Controller
 
     public function store(StoreProjectRequest $request)
     {
-        $project = Project::create([
-            'name' => $request->name,
-            'cover_image' => $request->cover_image,
-            'project_type' => $request->project_type,
-            'status' => $request->status,
-            'slug' => Str::slug($request->name),
-            'responsibles' => $request->responsibles,
-            'location' => $request->location,
-            'date' => $request->date,
-            'starting_time' => $request->starting_time,
-            'ending_time' => $request->ending_time,
-            'markdown' => $request->markdown,
-        ]);
+        $data = $request->validated();
+        
+        $data['slug'] = Str::slug($request->name);
+
+        $project = Project::create($data);
 
         return new ProjectResource($project);
     }
 
     public function show(string $slug)
-    {   
+    {
         $project = Project::where('slug', $slug)->firstOrFail();
 
         return new ProjectResource($project);
@@ -44,8 +36,8 @@ class ProjectController extends Controller
     public function update(UpdateProjectRequest $request, Project $project)
     {
         $data = $request->validated();
-        
-    
+
+
         if ($request->filled('name')) {
             $data['slug'] = Str::slug($request->name);
         }
@@ -55,7 +47,7 @@ class ProjectController extends Controller
         }
 
         $project->update($data);
-        
+
         return new ProjectResource($project);
     }
 

@@ -23,7 +23,7 @@ class StoreProjectRequest extends FormRequest
             'date' => 'nullable|date',
             'starting_time' => 'nullable|date_format:H:i',
             'ending_time' => 'nullable|date_format:H:i',
-            'markdown' => 'nullable|string',
+            'markdown' => 'required|string',
         ];
     }
 }
